@@ -46,7 +46,8 @@ def test_fetch_image_paths_and_labels(temp_image_dir, category):
 def test_load_image(temp_image_dir):
     # Test loading of a single image using load_image function
     image_path = os.path.join(temp_image_dir, "val", "real", "real_0.jpg")
-    image = load_image(image_path)
+    with open(image_path, 'rb') as image_file:
+        image = load_image(image_file)
 
     assert image.shape == (1, 3, 224, 224), "Loaded image should have shape (1, 3, 224, 224)"
     assert image.dtype == torch.float32, "Loaded image should be of type float32"
@@ -56,4 +57,5 @@ def test_load_image_invalid_file(temp_image_dir):
     # Test loading of an empty image file
     invalid_image_path = os.path.join(temp_image_dir, "train", "real", "real_0.jpg")
     with pytest.raises(UnidentifiedImageError):
-        load_image(invalid_image_path)
+        with open(invalid_image_path, 'rb') as image_file:
+            load_image(image_file)
