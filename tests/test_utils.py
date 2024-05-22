@@ -28,6 +28,10 @@ def temp_image_dir(tmpdir):
     real_img = Image.new('RGB', (224, 224), color=(73, 109, 137))
     real_img.save(os.path.join(real_dir, "real_0.jpg"))
 
+    empty_category_dir = tmp_image_dir.mkdir("empty_category")
+    empty_category_dir.mkdir("real")
+    empty_category_dir.mkdir("fake")
+
     return str(tmp_image_dir)
 
 
@@ -41,6 +45,25 @@ def test_fetch_image_paths_and_labels(temp_image_dir, category):
     assert all(isinstance(label, int) for label in labels), "All labels should be integers."
     assert set(labels) == {0, 1}, "Labels should contain both 0 (real) and 1 (fake)."
     assert len(paths) == len(set(paths)), "The paths should be different from each other."
+
+
+def test_fetch_image_paths_and_labels_invalid_dir(temp_image_dir):
+    # Test with non-existent category
+    with pytest.raises(FileNotFoundError):
+        fetch_image_paths_and_labels(temp_image_dir, "nonexistent")
+
+
+def test_fetch_image_paths_and_labels_one_valid_dir(temp_image_dir):
+    # Test with one directory being empty
+    paths, labels = fetch_image_paths_and_labels(temp_image_dir, "val")
+    assert len(paths) == 1
+    assert labels == (0,)  # only one real image
+
+
+def test_fetch_image_paths_and_labels_empty_dir(temp_image_dir):
+    # Test with both directories being empty
+    with pytest.raises(ValueError):
+        fetch_image_paths_and_labels(temp_image_dir, "empty_category")
 
 
 def test_load_image(temp_image_dir):

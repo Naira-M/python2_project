@@ -47,8 +47,21 @@ def display_images(image_paths, labels):
 
 
 def fetch_image_paths_and_labels(image_dir, category):
-    real_paths = sorted(glob(os.path.join(image_dir, category, "real", "*.jpg")))
-    fake_paths = sorted(glob(os.path.join(image_dir, category, "fake", "*.jpg")))
+    real_dir = os.path.join(image_dir, category, "real")
+    fake_dir = os.path.join(image_dir, category, "fake")
+
+    if not os.path.exists(real_dir) and not os.path.exists(fake_dir):
+        raise FileNotFoundError(
+            f"One or both required directories '{real_dir}' and '{fake_dir}' do not exist.")
+
+    real_paths = sorted(glob(os.path.join(real_dir, "*.jpg")))
+    fake_paths = sorted(glob(os.path.join(fake_dir, "*.jpg")))
+
+    # Check if directories contain .jpg files
+    if not real_paths and not fake_paths:
+        raise ValueError(
+            f"The directories '{real_dir}' and '{fake_dir}' are empty or does not contain any .jpg files.")
+
     real_labels = [0] * len(real_paths)
     fake_labels = [1] * len(fake_paths)
     data = list(zip(real_paths, real_labels)) + list(zip(fake_paths, fake_labels))
