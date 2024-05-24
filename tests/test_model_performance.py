@@ -8,7 +8,7 @@ from source.utils import fetch_image_paths_and_labels
 def test_loaded_model_performance(checkpoint_file, data_dir):
     test_dir = data_dir
 
-    paths, labels = fetch_image_paths_and_labels(test_dir, "test")
+    paths, labels = fetch_image_paths_and_labels(test_dir)
     loader = construct_loader(paths, labels, batch_size=2, train=False)
 
     image_classifier = ImageClassifier()

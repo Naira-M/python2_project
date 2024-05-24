@@ -7,7 +7,7 @@ from source.data_utils import construct_loader
 
 def main(data_path, checkpoint_path):
     # Load test data
-    test_image_paths, test_labels = fetch_image_paths_and_labels(data_path, "test")
+    test_image_paths, test_labels = fetch_image_paths_and_labels(data_path)
 
     # Load trained model
     print("Loading model...")

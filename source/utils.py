@@ -3,14 +3,33 @@ import os
 from glob import glob
 import io
 
+import matplotlib.pyplot as plt
 from PIL import Image
+import cv2
 
 from source.data_utils import preprocess_data
 
 
-def fetch_image_paths_and_labels(image_dir, category):
-    real_dir = os.path.join(image_dir, category, "real")
-    fake_dir = os.path.join(image_dir, category, "fake")
+def display_images(image_paths, labels):
+    fig, axes = plt.subplots(3, 3, figsize=(10, 10))
+    axes = axes.flatten()
+    for i, (img_path, label) in enumerate(zip(image_paths, labels)):
+        # Read the image
+        img = cv2.imread(img_path)
+        # Convert BGR to RGB
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # Display the image
+        axes[i].imshow(img)
+        axes[i].axis('off')
+        # Set the label based on the directory name
+        label_str = 'Fake' if label == 1 else 'Real'
+        axes[i].set_title(label_str)
+    plt.tight_layout()
+
+
+def fetch_image_paths_and_labels(image_dir):
+    real_dir = os.path.join(image_dir, "real")
+    fake_dir = os.path.join(image_dir, "fake")
 
     if not os.path.exists(real_dir) and not os.path.exists(fake_dir):
         raise FileNotFoundError(

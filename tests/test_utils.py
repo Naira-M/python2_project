@@ -6,10 +6,9 @@ from PIL import UnidentifiedImageError
 from source.utils import fetch_image_paths_and_labels, load_image
 
 
-@pytest.mark.parametrize("category", ["train", "test"])
-def test_fetch_image_paths_and_labels_basics(temp_image_dir, category):
-    image_dir = temp_image_dir
-    paths, labels = fetch_image_paths_and_labels(image_dir, category)
+def test_fetch_image_paths_and_labels_basics(temp_image_dir):
+    image_dir = f"{temp_image_dir}/train"
+    paths, labels = fetch_image_paths_and_labels(image_dir)
 
     assert len(paths) == len(labels), "The number of paths should be equal to the number of labels."
     assert len(paths) == 10, "The number of paths and labels should be 10 (5 real + 5 fake)."
@@ -18,28 +17,31 @@ def test_fetch_image_paths_and_labels_basics(temp_image_dir, category):
     assert len(paths) == len(set(paths)), "The paths should be different from each other."
 
     # test shuffling
-    new_paths, _ = fetch_image_paths_and_labels(image_dir, category)
+    new_paths, _ = fetch_image_paths_and_labels(image_dir)
 
     assert new_paths != paths, "Paths are not shuffled"
 
 
 def test_fetch_image_paths_and_labels_invalid_dir(temp_image_dir):
     # Test with non-existent category
+    img_path = f"{temp_image_dir}/nonexistent"
     with pytest.raises(FileNotFoundError):
-        fetch_image_paths_and_labels(temp_image_dir, "nonexistent")
+        fetch_image_paths_and_labels(img_path)
 
 
 def test_fetch_image_paths_and_labels_one_valid_dir(temp_image_dir):
     # Test with one directory being empty
-    paths, labels = fetch_image_paths_and_labels(temp_image_dir, "val")
+    img_path = f"{temp_image_dir}/val"
+    paths, labels = fetch_image_paths_and_labels(img_path)
     assert len(paths) == 1
     assert labels == (0,)  # only one real image
 
 
 def test_fetch_image_paths_and_labels_empty_dir(temp_image_dir):
     # Test with both directories being empty
+    img_path = f"{temp_image_dir}/empty_category"
     with pytest.raises(ValueError):
-        fetch_image_paths_and_labels(temp_image_dir, "empty_category")
+        fetch_image_paths_and_labels(img_path)
 
 
 def test_load_image(temp_image_dir):
