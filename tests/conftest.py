@@ -11,6 +11,28 @@ def pytest_addoption(parser):
         default="files/images/img1.jpg,files/images/img2.jpg",
         help="Comma-separated list of image paths")
 
+    parser.addoption(
+        "--checkpoint-path",
+        action="store",
+        default="files/checkpoint.pth",
+        help="The latest trained model's checkpoint file.")
+
+    parser.addoption(
+        "--data-dir",
+        action="store",
+        default="data/sample_data",
+        help="Directory of images.")
+
+
+@pytest.fixture
+def checkpoint_file(request):
+    return request.config.getoption("--checkpoint-path")
+
+
+@pytest.fixture
+def data_dir(request):
+    return request.config.getoption("--data-dir")
+
 
 @pytest.fixture
 def sample_data(request):

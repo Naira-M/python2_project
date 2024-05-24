@@ -33,7 +33,7 @@ def test_evaluate_model(generate_images):
 
     _, image_paths, labels = generate_images
 
-    loader = construct_loader(image_paths, labels, batch_size=4, train=True)
+    loader = construct_loader(image_paths, labels, batch_size=4, train=False)
 
     image_classifier = ImageClassifier()
     test_accuracy, test_loss, misclassified_images = image_classifier.evaluate_model(loader)
