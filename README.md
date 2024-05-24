@@ -364,45 +364,8 @@ ImageClassifier
 construct_loader and fetch_image_paths_and_labels
 Installation
 bash
-Копировать код
+
 pip install pytest
 Test Function
-test_loaded_model_performance
-Description: Evaluates the model on a test dataset, checking for accuracy, loss, and evaluation speed.
-Example Usage
-python
-Копировать код
-import pytest
-import time
-from model import ImageClassifier
-from data_utils import construct_loader, fetch_image_paths_and_labels
 
-@pytest.fixture
-def checkpoint_file(pytestconfig):
-    checkpoint_path = pytestconfig.getoption("checkpoint_path")
-    if not os.path.exists(checkpoint_path):
-        pytest.skip("Checkpoint path does not exist")
-    return checkpoint_path
-
-@pytest.fixture
-def data_dir(pytestconfig):
-    data_dir = pytestconfig.getoption("data_dir")
-    if not os.path.exists(data_dir):
-        pytest.skip("Data directory does not exist")
-    return data_dir
-
-def test_loaded_model_performance(checkpoint_file, data_dir):
-    image_paths, labels = fetch_image_paths_and_labels(data_dir, 'test')
-    test_loader = construct_loader(image_paths, labels, batch_size=32, train=False)
-
-    classifier = ImageClassifier()
-    classifier.load_model(checkpoint_file)
-
-    start_time = time.time()
-    test_loss, test_accuracy, _ = classifier.evaluate_model(test_loader)
-    evaluation_time = time.time() - start_time
-
-    assert test_loss < 2
-    assert test_accuracy > 0.90
-    assert evaluation_time < 1
 This README provides a comprehensive yet concise overview of the Fake Face Image Detection API and its associated modules, ensuring that developers can easily understand and use the provided functionalities.   
