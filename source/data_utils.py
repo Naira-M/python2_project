@@ -1,7 +1,7 @@
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-from CustomDataset import CustomDataset
+from custom_dataset import CustomDataset
 
 
 def preprocess_data(train=True):
