@@ -1,4 +1,4 @@
-# CustomDataset.py Documentation
+# CustomDataset.py 
 
 ## Overview
 `CustomDataset` is a PyTorch `Dataset` subclass for handling image data, facilitating image loading and transformations.
@@ -19,7 +19,7 @@
 - **Returns**: `tuple` - `(img, label)`.
 
 
-# data_utils.py Documentation
+# data_utils.py 
 
 ## Overview
 Utility functions for preprocessing image data and constructing data loaders using the `CustomDataset` class.
@@ -39,7 +39,7 @@ Utility functions for preprocessing image data and constructing data loaders usi
 - **Returns**: `DataLoader`.
 
 
-# model.py Documentation
+# model.py 
 
 ## Overview
 Defines the `ImageClassifier` class for image classification using a modified ResNet18 architecture.
@@ -67,7 +67,7 @@ Defines the `ImageClassifier` class for image classification using a modified Re
 - **Parameters**: `checkpoint_path`, `device`.
 
 
-# utils.py Documentation
+# utils.py 
 
 ## Overview
 Utility functions for handling images, fetching data, and visualization.
