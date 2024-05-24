@@ -7,7 +7,7 @@ from source.utils import fetch_image_paths_and_labels, load_image
 
 
 @pytest.mark.parametrize("category", ["train", "test"])
-def test_fetch_image_paths_and_labels(temp_image_dir, category):
+def test_fetch_image_paths_and_labels_basics(temp_image_dir, category):
     image_dir = temp_image_dir
     paths, labels = fetch_image_paths_and_labels(image_dir, category)
 
@@ -16,6 +16,11 @@ def test_fetch_image_paths_and_labels(temp_image_dir, category):
     assert all(isinstance(label, int) for label in labels), "All labels should be integers."
     assert set(labels) == {0, 1}, "Labels should contain both 0 (real) and 1 (fake)."
     assert len(paths) == len(set(paths)), "The paths should be different from each other."
+
+    # test shuffling
+    new_paths, _ = fetch_image_paths_and_labels(image_dir, category)
+
+    assert new_paths != paths, "Paths are not shuffled"
 
 
 def test_fetch_image_paths_and_labels_invalid_dir(temp_image_dir):

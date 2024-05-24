@@ -84,6 +84,8 @@ class ImageClassifier:
         with open(metadata_path, "wb") as f:
             pickle.dump(metadata, f)
 
+        return best_valid_loss
+
     def evaluate_model(self, test_loader, device='cpu'):
         self.model.eval()  # Set the model to evaluation mode
         correct, total, running_loss = 0, 0, 0.0

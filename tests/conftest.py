@@ -1,6 +1,7 @@
 import pytest
 import os
 from PIL import Image
+import numpy as np
 
 
 def pytest_addoption(parser):
@@ -14,8 +15,6 @@ def pytest_addoption(parser):
 @pytest.fixture
 def sample_data(request):
     image_paths_str = request.config.getoption("--image-paths")
-    # if not image_paths_str:
-    #     pytest.skip("No image paths provided. Please provide valid image paths using --image-paths option.")
 
     image_paths = image_paths_str.split(',')
     if len(image_paths) == 1:
@@ -52,4 +51,25 @@ def temp_image_dir(tmpdir):
     empty_category_dir.mkdir("fake")
 
     return str(tmp_image_dir)
+
+
+@pytest.fixture
+def generate_images(tmpdir):
+    np.random.seed(42)
+
+    tmp_image_dir = tmpdir.mkdir("images")
+
+    # Generate image paths and labels
+    image_paths = []
+    labels = []
+
+    for i in range(8):
+        img_path = os.path.join(tmp_image_dir, f"image_{i}.jpg")
+        random_array = np.random.randint(0, 256, size=(3, 224, 224), dtype=np.uint8)
+        image = Image.fromarray(random_array.transpose(1, 2, 0))
+        image.save(img_path)
+        image_paths.append(img_path)
+        labels.append(np.random.randint(0, 2))
+
+    return tmp_image_dir, image_paths, labels
 
