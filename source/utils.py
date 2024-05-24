@@ -7,11 +7,6 @@ import matplotlib.pyplot as plt
 import cv2
 from PIL import Image
 
-import torch
-import torch.nn as nn
-from torchvision.models import resnet18
-
-
 from source.data_utils import preprocess_data
 
 
@@ -78,25 +73,3 @@ def load_image(image_file):
     image = image.unsqueeze(0)  # Add batch dimension
 
     return image
-
-
-def classify_image(model, image_file, device=torch.device('cpu')):
-    image = load_image(image_file)
-    image = image.to(device)
-
-    with torch.no_grad():
-        outputs = model(image)
-        value, predicted = torch.max(outputs, 1)
-    img_class = "Fake" if predicted.item() == 1 else "Real"
-
-    return img_class
-
-
-def load_model(checkpoint_path, device=torch.device('cpu')):
-    model = resnet18()
-    model.fc = nn.Linear(model.fc.in_features, 2)
-    model.load_state_dict(torch.load(checkpoint_path, map_location=torch.device('cpu')))
-    model.eval()
-    model.to(device)
-
-    return model

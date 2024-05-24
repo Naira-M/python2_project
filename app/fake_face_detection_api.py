@@ -4,16 +4,16 @@ import uvicorn
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 
-from source.utils import load_model, classify_image
+from source.model import ImageClassifier
 
 
-MODEL = load_model("files/checkpoint.pth")
+MODEL = ImageClassifier()
 
 app = FastAPI(
     title="Fake Face Image Detection API",
     description="Takes uploaded image and returns its class (fake or real).",
     version="0.0.1",
-    openapi_tags=[{"name": "Segment", "description": "API endpoints related to image segmentation"}]
+    openapi_tags=[{"name": "Classify", "description": "API endpoints related to image classification"}]
 )
 
 
@@ -44,7 +44,8 @@ def classify(
         return JSONResponse(status_code=400, content={"message": "File provided is not an image."})
 
     try:
-        img_class = classify_image(MODEL, image.file)
+        MODEL.load_model("files/checkpoint.pth")
+        img_class = MODEL.predict(image.file)
         return JSONResponse(content={
             "filename": image.filename,
             "class": img_class

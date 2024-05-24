@@ -25,7 +25,6 @@ def sample_data(request):
     return image_paths, labels
 
 
-
 @pytest.fixture
 def temp_image_dir(tmpdir):
     # Create a temporary directory
