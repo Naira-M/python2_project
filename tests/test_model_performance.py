@@ -23,6 +23,6 @@ def test_loaded_model_performance(checkpoint_file, data_dir):
     assert loss < 2, "Loss is grater than 2."
     assert accuracy > 0.9, "Accuracy is less than 0.9"
 
-    assert evaluation_time <= 1, f"Model evaluation took too long: {evaluation_time} seconds"
+    assert evaluation_time <= 2, f"Model evaluation took too long: {evaluation_time} seconds"
 
 

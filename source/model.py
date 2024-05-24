@@ -23,6 +23,7 @@ class ImageClassifier:
         # Move the model to the device
         self.model = self.model.to(device)
         best_valid_loss = float('inf')
+        best_valid_acc = 0.0
 
         for epoch in range(num_epochs):
             # Training phase
@@ -65,6 +66,7 @@ class ImageClassifier:
 
             # Save model checkpoint if validation loss improves
             if validation_loss < best_valid_loss:
+                best_valid_acc = validation_accuracy
                 best_valid_loss = validation_loss
                 torch.save(self.model.state_dict(), checkpoint_path)
                 print(f'Saving model checkpoint at epoch {epoch+1}')
@@ -78,6 +80,8 @@ class ImageClassifier:
             "model": "Resnet18",
             "dataset_used": "140k-real-and-fake-faces",
             "related_research_papers": ["https://arxiv.org/abs/1512.03385"],
+            "validation_loss": best_valid_loss,
+            "validation_accuracy": best_valid_acc,
             "training_date": str(today.date())
         }
 
