@@ -26,18 +26,23 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def checkpoint_file(request):
-    return request.config.getoption("--checkpoint-path")
+    checkpoint_path = request.config.getoption("--checkpoint-path")
+    if not os.path.exists(checkpoint_path):
+        pytest.skip(f"Default checkpoint path '{checkpoint_path}' does not exist.")
+    return checkpoint_path
 
 
 @pytest.fixture
 def data_dir(request):
-    return request.config.getoption("--data-dir")
+    test_data_dir = request.config.getoption("--data-dir")
+    if not os.path.exists(test_data_dir):
+        pytest.skip(f"Default checkpoint path '{test_data_dir}' does not exist.")
+    return test_data_dir
 
 
 @pytest.fixture
 def sample_data(request):
     image_paths_str = request.config.getoption("--image-paths")
-
     image_paths = image_paths_str.split(',')
     if len(image_paths) == 1:
         labels = [0]
