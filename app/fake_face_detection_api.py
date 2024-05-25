@@ -15,8 +15,8 @@ from source.model import ImageClassifier
 MODEL = ImageClassifier()
 
 # Create dir for saving images
-# if not os.path.exists('classified_images'):
-#     os.makedirs('classified_images')
+if not os.path.exists('classified_images'):
+    os.makedirs('classified_images')
 
 app = FastAPI(
     title="Fake Face Image Detection API",
@@ -147,7 +147,7 @@ def model_metadata():
 
 
 @app.post("/classify/", tags=["Model"])
-def classify(
+async def classify(
         image: UploadFile = File(description="A required image file for classification.")):
     """
     Classify an uploaded image as real or generated (fake).
@@ -163,17 +163,23 @@ def classify(
         JSONResponse: A JSON response containing the filename and classification result,
                       or an error message if the file is not an image.
     """
+    # Verify if the uploaded file is an image
     if not image.content_type.startswith("image/"):
         return JSONResponse(status_code=400, content={"message": "File provided is not an image."})
 
-    # Save the original image
-    # img = Image.open(io.BytesIO(await image.read())).convert("RGB")
-    # image_path = f"classified_images/{image.filename}"
-    # img.save(image_path)
+    try:
+        # Read the uploaded image file
+        image_bytes = await image.read()
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"message": f"Error opening image file: {str(e)}"})
+
+    image_path = f"classified_images/{image.filename}"
+    img.save(image_path)
 
     try:
         MODEL.load_model("files/checkpoint.pth")
-        img_class = MODEL.predict(image.file)
+        img_class = MODEL.predict(io.BytesIO(image_bytes))
         return JSONResponse(content={
             "filename": image.filename,
             "class": img_class
@@ -183,7 +189,7 @@ def classify(
 
 
 @app.post("/classify_multiple_images/", tags=["Model"])
-def upload_multiple(
+async def upload_multiple(
         images: list[UploadFile] = File(...)):
     """
     Classify multiple uploaded images as real or generated (fake).
@@ -204,14 +210,19 @@ def upload_multiple(
             results.append({"filename": image.filename, "error": "File provided is not an image."})
             continue
 
-        # Save the original image
-        # img = Image.open(io.BytesIO(image.read())).convert("RGB")
-        # image_path = f"classified_images/{image.filename}"
-        # img.save(image_path)
+        try:
+            # Read the uploaded image file
+            image_bytes = await image.read()
+            img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        except Exception as e:
+            return JSONResponse(status_code=400, content={"message": f"Error opening image file: {str(e)}"})
+
+        image_path = f"classified_images/{image.filename}"
+        img.save(image_path)
 
         try:
             MODEL.load_model("files/checkpoint.pth")
-            img_class = MODEL.predict(image.file)
+            img_class = MODEL.predict(io.BytesIO(image_bytes))
             results.append({"filename": image.filename, "class": img_class})
 
         except Exception as e:
@@ -220,29 +231,45 @@ def upload_multiple(
     return {"results": results}
 
 
-# @app.get("/history", tags=["History"])
-# def image_history():
-#     """
-#
-#     """
-#     files = os.listdir("classified_images")
-#     history = [file for file in files]
-#     if history:
-#         return {"history": history}
-#     else:
-#         return "There are no images in history."
-#
-#
-# @app.get("/img/{image_name}", tags=["History"])
-# def get_classified_image(image_name: str):
-#     """
-#
-#     """
-#     file_path = f"classified_images/{image_name}"
-#     if os.path.exists(file_path):
-#         return FileResponse(file_path)
-#     else:
-#         raise HTTPException(status_code=404, detail="Image not found")
+@app.get("/history", tags=["History"])
+def image_history():
+    """
+    Retrieve the history of classified images.
+
+    This endpoint lists all the files for which we have sent request to one of classification endpoints
+
+    Returns:
+        JSONResponse: A JSON response containing a list of filenames of classified images,
+                      or a message indicating there are no images in history.
+    """
+    files = os.listdir("classified_images")
+    history = [file for file in files]
+    if history:
+        return {"history": history}
+    else:
+        return "There are no images in history."
+
+
+@app.get("/img/{image_name}", tags=["History"])
+def get_classified_image(image_name: str):
+    """
+    Retrieve a classified image by name.
+
+    This endpoint returns a classified image file from the classified images history
+    based on the provided image name.
+
+    Args:
+        image_name (str): The name of the image file to retrieve from history dir.
+
+    Returns:
+        FileResponse: The image file if it exists.
+        HTTPException: A 404 error if the image file is not found.
+    """
+    file_path = f"classified_images/{image_name}"
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="Image not found")
 
 
 if __name__ == "__main__":
