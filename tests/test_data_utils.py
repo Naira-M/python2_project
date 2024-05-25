@@ -24,8 +24,6 @@ def test_preprocess_data(train):
     assert transformed_img.shape[0] == 3, "Transformed image should have 3 channels (RGB)"
     assert transformed_img.shape[1:] == (224, 224), "Transformed image should have shape (224, 224)"
 
-    # TODO: Add normalization check
-
 
 @pytest.mark.parametrize("batch_size", [1, 2, 33])
 def test_data_loading(sample_data, batch_size):
