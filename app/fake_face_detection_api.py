@@ -1,5 +1,8 @@
 import pickle
 import os
+import io
+
+from PIL import Image
 
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, HTTPException
@@ -10,6 +13,10 @@ from source.model import ImageClassifier
 
 
 MODEL = ImageClassifier()
+
+# Create dir for saving images
+# if not os.path.exists('classified_images'):
+#     os.makedirs('classified_images')
 
 app = FastAPI(
     title="Fake Face Image Detection API",
@@ -23,14 +30,16 @@ app = FastAPI(
 def root():
     """Greet a user."""
     return """
-   <html>
+    <html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Welcome to Fake Face Image Detection API</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
                 background-image: url(
-                'https://img.freepik.com/free-vector/realistic-polygonal-background_23-2148897123.jpg?size=626&ext=jpg&ga=GA1.1.2021396666.1716520252&semt=ais_user');
+                'https://img.freepik.com/free-vector/realistic-polygonal-background_23-2148897123.jpg?size=626&ext=jpg&ga=GA1.1.2021396666.1716520252&semt=ais_user'); 
                 background-size: cover;
                 background-position: center;
                 text-align: center;
@@ -54,14 +63,68 @@ def root():
                 color: #007bff;
                 text-decoration: none;
             }
+            .upload-container {
+                margin-top: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .upload-btn {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-right: 10px;
+            }
+            .upload-btn:hover {
+                background-color: #45a049;
+            }
+            #imageInput {
+                display: none;
+            }
+            #result {
+                margin-top: 20px;
+                color: #333333;
+            }
         </style>
     </head>
     <body>
         <div class="container">
             <h1>Welcome to Fake Face Image Detection API</h1>
             <h4><p>This API allows you to classify uploaded images as real or generated (fake) using ResNet18 model.</p></h4>
-            <p><a href="/classify/">Upload an image to get started!</a></p>
         </div>
+    
+        <div class="upload-container">
+            <input type="file" id="imageInput" name="image">
+            <label for="imageInput" class="upload-btn">Select</label>
+        </div>
+    
+        <div id="result"></div>
+    
+        <script>
+            const imageInput = document.getElementById('imageInput');
+            const resultDiv = document.getElementById('result');
+    
+            imageInput.addEventListener('change', async () => {
+                const formData = new FormData();
+                formData.append('image', imageInput.files[0]);
+    
+                try {
+                    const response = await fetch('/classify/', {
+                        method: 'POST',
+                        body: formData
+                    });
+    
+                    const data = await response.json();
+                    resultDiv.innerText = `Filename: ${data.filename}, Class: ${data.class}`;
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+        </script>
     </body>
     </html>
     """
@@ -78,13 +141,18 @@ def model_metadata():
 
 
 @app.post("/classify/", tags=["Model"])
-def classify(
+async def classify(
         image: UploadFile = File(description="A required image file for classification.")):
     """
     Finds out if the uploaded image is real or generated (fake).
     """
     if not image.content_type.startswith("image/"):
         return JSONResponse(status_code=400, content={"message": "File provided is not an image."})
+
+    # Save the original image
+    # img = Image.open(io.BytesIO(await image.read())).convert("RGB")
+    # image_path = f"classified_images/{image.filename}"
+    # img.save(image_path)
 
     try:
         MODEL.load_model("files/checkpoint.pth")
@@ -98,7 +166,7 @@ def classify(
 
 
 @app.post("/classify_multiple_images/", tags=["Model"])
-async def upload_multiple(
+def upload_multiple(
         images: list[UploadFile] = File(...)):
     """
         Finds out if the uploaded images are real or generated (fake).
@@ -108,6 +176,11 @@ async def upload_multiple(
         if not image.content_type.startswith("image/"):
             results.append({"filename": image.filename, "error": "File provided is not an image."})
             continue
+
+        # Save the original image
+        # img = Image.open(io.BytesIO(image.read())).convert("RGB")
+        # image_path = f"classified_images/{image.filename}"
+        # img.save(image_path)
 
         try:
             MODEL.load_model("files/checkpoint.pth")
@@ -120,26 +193,29 @@ async def upload_multiple(
     return {"results": results}
 
 
-@app.get("/history/{image_dir}", tags=["History"])
-def image_history(image_dir: str):
-    """
-
-    """
-    files = os.listdir(image_dir)
-    history = [file for file in files]
-    return {"history": history}
-
-
-@app.get("/img/{image_dir}/{image_name}", tags=["History"])
-def get_classified_image(image_dir: str, image_name: str):
-    """
-
-    """
-    file_path = f"{image_dir}/{image_name}"
-    if os.path.exists(file_path):
-        return FileResponse(file_path)
-    else:
-        raise HTTPException(status_code=404, detail="Image not found")
+# @app.get("/history", tags=["History"])
+# def image_history():
+#     """
+#
+#     """
+#     files = os.listdir("classified_images")
+#     history = [file for file in files]
+#     if history:
+#         return {"history": history}
+#     else:
+#         return "There are no images in history."
+#
+#
+# @app.get("/img/{image_name}", tags=["History"])
+# def get_classified_image(image_name: str):
+#     """
+#
+#     """
+#     file_path = f"classified_images/{image_name}"
+#     if os.path.exists(file_path):
+#         return FileResponse(file_path)
+#     else:
+#         raise HTTPException(status_code=404, detail="Image not found")
 
 
 if __name__ == "__main__":
