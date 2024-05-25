@@ -22,6 +22,10 @@ pytest --image-paths="files/images/img1.jpg,files/images/img2.jpg" --checkpoint-
 ```
 The tests can be run with the following command-line arguments (the given values are the defaults). If the tests are run without these arguments and the default paths do not exist on your system, the tests will be skipped
 
-
+## Running the Main Script
+```bash
+python3 main.py "path/to/data" "path/to/chechkpoints"
+```
+Runs evaluation on given data with given model (in checkpoints) and print accuracy.
 
 
