@@ -6,6 +6,7 @@ The Fake Face Image Detection API is a FastAPI-based application designed to cla
 ## Running the Server
 Start the server:
 ```bash
+export PYTHONPATH=$PYTHONPATH:`pwd`
 python app/fake_face_detection_api.py
 ```
 The server runs on `http://0.0.0.0:8000` with live reloading enabled.
