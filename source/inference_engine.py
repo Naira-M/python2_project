@@ -1,4 +1,5 @@
-from utils import construct_loader
+from source.data_utils import construct_loader
+
 import torch
 import torch.nn as nn
 import torchvision.models as models
