@@ -133,7 +133,13 @@ def root():
 @app.get("/model-info", tags=["Model"])
 def model_metadata():
     """
-    Information of the latest trained mode.
+    Retrieve information about the latest trained model.
+
+    This endpoint reads the metadata of the latest trained model from a pickle file
+    and returns it as a JSON response.
+
+    Returns:
+        JSONResponse: A JSON response containing the model metadata.
     """
     with open("files/metadata.pkl", "rb") as f:
         metadata = pickle.load(f)
@@ -141,10 +147,21 @@ def model_metadata():
 
 
 @app.post("/classify/", tags=["Model"])
-async def classify(
+def classify(
         image: UploadFile = File(description="A required image file for classification.")):
     """
-    Finds out if the uploaded image is real or generated (fake).
+    Classify an uploaded image as real or generated (fake).
+
+    This endpoint accepts an image file, checks its type, and uses a pre-trained model
+    to classify the image as real or generated. The classification result is returned
+    in a JSON response.
+
+    Args:
+        image (UploadFile): The image file to be classified.
+
+    Returns:
+        JSONResponse: A JSON response containing the filename and classification result,
+                      or an error message if the file is not an image.
     """
     if not image.content_type.startswith("image/"):
         return JSONResponse(status_code=400, content={"message": "File provided is not an image."})
@@ -169,7 +186,17 @@ async def classify(
 def upload_multiple(
         images: list[UploadFile] = File(...)):
     """
-        Finds out if the uploaded images are real or generated (fake).
+    Classify multiple uploaded images as real or generated (fake).
+
+    This endpoint accepts a list of image files, checks their types, and uses a pre-trained model
+    to classify each image as real or generated. The classification results are returned in a JSON response.
+
+    Args:
+        images (list[UploadFile]): A list of image files to be classified.
+
+    Returns:
+        dict: A dictionary containing the filenames and classification results for each image,
+              or error messages for files that are not images.
     """
     results = []
     for image in images:
