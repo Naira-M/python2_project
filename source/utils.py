@@ -3,9 +3,12 @@ import os
 from glob import glob
 import io
 
+import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import cv2
+
+from torchvision.utils import make_grid
 
 from source.data_utils import preprocess_data
 
@@ -25,6 +28,28 @@ def display_images(image_paths, labels):
         label_str = 'Fake' if label == 1 else 'Real'
         axes[i].set_title(label_str)
     plt.tight_layout()
+
+
+def display_normalized_images(train_loader, n=9):
+    # Fetch the first batch of images
+    images, labels = next(iter(train_loader))
+
+    images = images[:n]
+    labels = labels[:n]
+
+    # Create a grid of images with 3 rows and 3 columns
+    grid_img = make_grid(images, nrow=3)
+
+    # Convert the tensor grid image to a numpy array and transpose it to (height, width, channels)
+    grid_img = grid_img.permute(1, 2, 0).numpy()
+
+    # Clip pixel values to ensure they fall within the valid range
+    grid_img = np.clip(grid_img, 0, 1)
+
+    # Display the grid of images
+    plt.figure(figsize=(10, 10))
+    plt.imshow(grid_img)
+    plt.axis('off')
 
 
 def fetch_image_paths_and_labels(image_dir):
